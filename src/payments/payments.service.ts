@@ -41,12 +41,12 @@ export class PaymentsService {
         return await this.paymentsRepository.find({ where: { userId } });
     }
 
-    async updateStatus(id: string, updateStatusDto: UpdatePaymentStatusDto): Promise<Payment> {
+    async updateStatus(id: string, status: string): Promise<Payment> {
         const payment = await this.findOne(id);
         if (!payment) {
             throw new NotFoundException(`Pago con ID ${id} no encontrado`);
         }
-        payment.status = updateStatusDto.status;
+        payment.status = status;
         return await this.paymentsRepository.save(payment);
     }
 

@@ -1,7 +1,8 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
 import { ApiProperty } from "@nestjs/swagger";
 
 @Entity('payments')
+@Unique(['orderId']) 
 export class Payment {
     @ApiProperty({
         description: 'ID unico del pago',

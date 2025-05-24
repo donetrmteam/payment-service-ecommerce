@@ -35,12 +35,15 @@ export class PaymentsController {
     }
 
     @MessagePattern({ cmd: 'update_payment_status' })
-    async updateStatus(@Payload() data: { id: string; updateStatusDto: UpdatePaymentStatusDto }): Promise<Payment> {
-        return this.paymentsService.updateStatus(data.id, data.updateStatusDto);
+    async updateStatus(@Payload() data: { id: string; status: string }): Promise<Payment> {
+        return this.paymentsService.updateStatus(data.id, data.status);
     }
 
     @MessagePattern({ cmd: 'remove_payment' })
-    async remove(@Payload() data: { id: string }): Promise<void> {
-        return this.paymentsService.remove(data.id);
+    async remove(@Payload() data: { id: string }): Promise<{succes: boolean}> {
+        await this.paymentsService.remove(data.id);
+        return { succes: true}
     }
+
 }
+
