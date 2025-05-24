@@ -10,8 +10,8 @@ export class PaymentsController {
     constructor(private readonly paymentsService: PaymentsService) {}
 
     @MessagePattern({ cmd: 'create_payment' })
-    async create(@Payload() data: { createPaymentDto: CreatePaymentDto }): Promise<Payment> {
-        return this.paymentsService.create(data.createPaymentDto);
+    async create(@Payload() data: CreatePaymentDto ): Promise<Payment> {
+        return this.paymentsService.create(data);
     }
 
     @MessagePattern({ cmd: 'find_all_payments' })
@@ -35,14 +35,14 @@ export class PaymentsController {
     }
 
     @MessagePattern({ cmd: 'update_payment_status' })
-    async updateStatus(@Payload() data: { id: string; status: string }): Promise<Payment> {
-        return this.paymentsService.updateStatus(data.id, data.status);
+    async updateStatus(@Payload() data: { orderId: string; status: string }): Promise<Payment> {
+        return this.paymentsService.updateStatus(data.orderId, data.status);
     }
 
-    @MessagePattern({ cmd: 'remove_payment' })
-    async remove(@Payload() data: { id: string }): Promise<{succes: boolean}> {
-        await this.paymentsService.remove(data.id);
-        return { succes: true}
+    @MessagePattern({ cmd: 'remove_payment_by_order_id' })
+    async removeByOrderId(@Payload() data: { OrderId: string }): Promise<{success: boolean}> {
+        await this.paymentsService.removeByOrderId(data.OrderId)
+        return { success: true}
     }
 
 }

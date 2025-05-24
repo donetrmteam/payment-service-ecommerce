@@ -1,5 +1,7 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
 import { ApiProperty } from "@nestjs/swagger";
+import { Optional } from "@nestjs/common";
+import { IsOptional, IsString } from "class-validator";
 
 @Entity('payments')
 @Unique(['orderId']) 
@@ -45,8 +47,8 @@ export class Payment {
     })
     @Column({
         type: 'enum',
-        enum: ['PENDING', 'PAID', 'FAILED'],
-        default: 'PENDING'
+        enum: ['PENDIENTE', 'PAGADO', 'FALLO'],
+        default: 'PENDIENTE'
     })
     status: string;
 
@@ -57,6 +59,16 @@ export class Payment {
     })
     @Column({length: 100, nullable: true})
     transactionId: string;
+
+
+    @ApiProperty({ 
+        example: '4111111111111111', 
+        required: false 
+    })
+    @IsOptional()
+    @IsString()
+    cardNumber? : string
+
 
     @ApiProperty({
         description: 'Fecha de creación del pago',

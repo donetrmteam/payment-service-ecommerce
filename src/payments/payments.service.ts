@@ -1,9 +1,9 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Payment } from './entities/payment.entity';
 import { Repository } from 'typeorm';
 import { CreatePaymentDto } from './dto/create-payment.dto';
-import { UpdatePaymentStatusDto } from './dto/update-payment-status.dto';
+import { simulatePayment } from 'src/utils/payment-simulado';
 
 @Injectable()
 export class PaymentsService {
@@ -13,13 +13,28 @@ export class PaymentsService {
     ) {}
 
     async create(createPaymentDto: CreatePaymentDto): Promise<Payment> {
-        try {
-          const payment = this.paymentsRepository.create(createPaymentDto);
-          return await this.paymentsRepository.save(payment);
-        } catch (error) {
-          throw new InternalServerErrorException('Error al crear el pago');
-        }
-      }
+     try {
+
+      if (!createPaymentDto.cardNumber) {
+       throw new BadRequestException('Número de tarjeta es obligatorio');
+      } 
+
+    const paymentSimulation = await simulatePayment(createPaymentDto.cardNumber);
+
+    if (!paymentSimulation.success) {
+      throw new BadRequestException(`Pago rechazado: ${paymentSimulation.message}`);
+    }
+
+    
+    createPaymentDto.transactionId = paymentSimulation.transactionId;
+
+    const payment = this.paymentsRepository.create(createPaymentDto);
+    return await this.paymentsRepository.save(payment);
+   } catch (error) {
+    console.error('Error en create payment:', error);
+    throw new InternalServerErrorException('Error al crear el pago');
+   }
+ }
 
     async findAll(): Promise<Payment[]> {
        return await this.paymentsRepository.find(); 
@@ -31,7 +46,7 @@ export class PaymentsService {
             throw new InternalServerErrorException('Pago no encontrado');
         }
         return payment;
-  }
+  } 
 
     async findByOrderId(orderId: string): Promise<Payment[]> {
         return await this.paymentsRepository.find({ where: { orderId } });
@@ -41,20 +56,21 @@ export class PaymentsService {
         return await this.paymentsRepository.find({ where: { userId } });
     }
 
-    async updateStatus(id: string, status: string): Promise<Payment> {
-        const payment = await this.findOne(id);
+    async updateStatus(orderId: string, status: string): Promise<Payment> {
+        const payment = await this.paymentsRepository.findOne({ where: { orderId }})
         if (!payment) {
-            throw new NotFoundException(`Pago con ID ${id} no encontrado`);
+            throw new NotFoundException(`Pago con ID ${orderId} no encontrado`);
         }
         payment.status = status;
         return await this.paymentsRepository.save(payment);
     }
 
-    async remove(id: string): Promise<void> {
-        const result = await this.paymentsRepository.delete(id);
-        if (result.affected === 0) {
-            throw new NotFoundException(`Pago con ID ${id} no encontrado`);
+    async removeByOrderId(orderId: string): Promise<void> {
+        const result = await this.paymentsRepository.findOne({ where: { orderId }})
+        if (!result) {
+            throw new NotFoundException(`Pago con ID ${orderId} no encontrado`);
         }
+        await this.paymentsRepository.remove(result)
         
     }
 }

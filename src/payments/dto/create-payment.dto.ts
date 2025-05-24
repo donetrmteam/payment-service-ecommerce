@@ -34,10 +34,10 @@ export class CreatePaymentDto {
 
     @ApiProperty({
         description: 'Estado del pago',
-        example: 'PAID',
-        enum: ['PENDING', 'PAID', 'FAILED'],
+        example: 'PAGADO',
+        enum: ['PENDIENTE', 'PAGADO', 'FALLO'],
     })
-    @IsIn(['PENDING', 'PAID', 'FAILED'], { message: 'El estado debe ser uno de los siguientes: PENDING, PAID, FAILED' })
+    @IsIn(['PENDIENTE', 'PPAGADO', 'FALLO'], { message: 'El estado debe ser uno de los siguientes: PENDING, PAID, FAILED' })
     status: string;
 
     @ApiProperty({
@@ -48,4 +48,15 @@ export class CreatePaymentDto {
     @IsString({ message: 'El ID de la transacción debe ser una cadena de texto' })    
     @MaxLength(100, { message: 'El ID de la transacción no puede exceder los 100 caracteres' })
     transactionId?: string;
+
+
+     @ApiProperty({
+        description: 'Numero de tarjeta',
+        example: '12542548254932654',
+        required: false,
+    })
+    @IsOptional()
+    @IsString({ message: 'La tarjeta debe ser una cadena de texto' })    
+    @MaxLength(16, { message: 'El número de tarjeta no puede exceder los 16 caracteres' })
+    cardNumber?: string;
 }
