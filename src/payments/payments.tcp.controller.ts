@@ -35,8 +35,8 @@ export class PaymentsController {
     }
 
     @MessagePattern({ cmd: 'update_payment_status' })
-    async updateStatus(@Payload() data: { orderId: string; status: string }): Promise<Payment> {
-        return this.paymentsService.updateStatus(data.orderId, data.status);
+    async updateStatus(@Payload() data: UpdatePaymentStatusDto): Promise<Payment> {
+        return this.paymentsService.updateStatus(data.orderId, data.status, data.paymentMethod, data.cardNumber);
     }
 
     @MessagePattern({ cmd: 'remove_payment_by_order_id' })

@@ -13,28 +13,13 @@ export class PaymentsService {
     ) {}
 
     async create(createPaymentDto: CreatePaymentDto): Promise<Payment> {
-     try {
-
-      if (!createPaymentDto.cardNumber) {
-       throw new BadRequestException('Número de tarjeta es obligatorio');
-      } 
-
-    const paymentSimulation = await simulatePayment(createPaymentDto.cardNumber);
-
-    if (!paymentSimulation.success) {
-      throw new BadRequestException(`Pago rechazado: ${paymentSimulation.message}`);
+        try {
+            const payment = this.paymentsRepository.create(createPaymentDto);
+            return await this.paymentsRepository.save(payment);
+        } catch (error) {
+            throw new InternalServerErrorException('Error al crear el pago');
+        }
     }
-
-    
-    createPaymentDto.transactionId = paymentSimulation.transactionId;
-
-    const payment = this.paymentsRepository.create(createPaymentDto);
-    return await this.paymentsRepository.save(payment);
-   } catch (error) {
-    console.error('Error en create payment:', error);
-    throw new InternalServerErrorException('Error al crear el pago');
-   }
- }
 
     async findAll(): Promise<Payment[]> {
        return await this.paymentsRepository.find(); 
@@ -56,12 +41,21 @@ export class PaymentsService {
         return await this.paymentsRepository.find({ where: { userId } });
     }
 
-    async updateStatus(orderId: string, status: string): Promise<Payment> {
+    async updateStatus(orderId: string, status: string, paymentMethod: string, cardNumber: string): Promise<Payment> {
         const payment = await this.paymentsRepository.findOne({ where: { orderId }})
         if (!payment) {
             throw new NotFoundException(`Pago con ID ${orderId} no encontrado`);
         }
+
+        const resultPayment = await simulatePayment(cardNumber);
+
+        if(!resultPayment.success) {
+            throw new BadRequestException(resultPayment.message)
+        }
+
         payment.status = status;
+        payment.paymentMethod = paymentMethod;
+        payment.transactionId = resultPayment.transactionId;
         return await this.paymentsRepository.save(payment);
     }
 

@@ -31,15 +31,15 @@ export class Payment {
         description: 'Monto del pago',
         example: 100.50,
     })
-    @Column({type: 'decimal', precision: 10, scale: 2})
+    @Column('decimal', { precision: 10, scale: 2 })
     amount: number;
 
     @ApiProperty({
         description: 'Método de pago utilizado',
         example: 'Tarjeta',
     })
-    @Column({length: 50})
-    paymentMethod: string;
+    @Column({length: 50, nullable: true})
+    paymentMethod: string; 
 
     @ApiProperty({
         description: 'Estado del pago',
@@ -58,11 +58,11 @@ export class Payment {
         example: 'tx_1234567890',
     })
     @Column({length: 100, nullable: true})
-    transactionId: string;
+    transactionId?: string;
 
 
     @ApiProperty({ 
-        example: '4111111111111111', 
+        example: '4111111111111111',  
         required: false 
     })
     @IsOptional()
