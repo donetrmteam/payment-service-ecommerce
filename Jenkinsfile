@@ -92,6 +92,8 @@ pipeline {
                                 npm install -g pm2
                                 pm2 --version
 
+                                pm2 startup | tail -n 1 | bash
+
                                 # Instalar Git si no está presente
                                 if ! command -v git &> /dev/null; then
                                     sudo apt install -y git
